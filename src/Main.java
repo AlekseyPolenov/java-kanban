@@ -173,7 +173,7 @@ public class Main {
                             System.out.println("Введите статус NEW, IN_PROGRESS, DONE");
                             StatusEnum status = StatusEnum.valueOf(scanner.next());
 
-                            SubTask subTask = new SubTask(name, description, status, epicTask);
+                            SubTask subTask = new SubTask(name, description, status, epicTask.getId());
                             taskManager.addSubTask(subTask);
 
                         } else if (commandSubTask == 5) {
@@ -192,6 +192,8 @@ public class Main {
                             System.out.println("Введите статус NEW, IN_PROGRESS, DONE");
                             StatusEnum status = StatusEnum.valueOf(scanner.next());
                             subTask.setStatus(status);
+                            EpicTask epicTask = taskManager.getEpicTask(subTask.getEpicId());
+                            epicTask.updateStatus();
                         }
                         break;
                 case 0:

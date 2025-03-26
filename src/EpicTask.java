@@ -8,19 +8,17 @@ public class EpicTask extends Task {
         subTasks = new ArrayList<>();
     }
 
-    @Override
     public void setStatus(StatusEnum status) {
     }
 
-    @Override
-    public StatusEnum getStatus() {
-        if (subTasks.isEmpty()) return StatusEnum.NEW;
+    public void updateStatus() {
+        StatusEnum updatedStatus = StatusEnum.IN_PROGRESS;
+        if (subTasks.isEmpty()) updatedStatus = StatusEnum.NEW;
 
-        if (hasAllSubTasksStatus(StatusEnum.DONE)) return StatusEnum.DONE;
+        if (hasAllSubTasksStatus(StatusEnum.DONE)) updatedStatus =  StatusEnum.DONE;
 
-        if (hasAllSubTasksStatus(StatusEnum.NEW)) return StatusEnum.NEW;
-
-        return StatusEnum.IN_PROGRESS;
+        if (hasAllSubTasksStatus(StatusEnum.NEW)) updatedStatus = StatusEnum.NEW;
+        super.setStatus(updatedStatus);
     }
 
     private boolean hasAllSubTasksStatus(StatusEnum statusEnum) {

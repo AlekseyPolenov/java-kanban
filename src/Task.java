@@ -11,7 +11,10 @@ public class Task {
         this.name = name;
         this.description = description;
         this.status = status;
-        this.id = TaskManager.getGenerateId();
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public long getId() {

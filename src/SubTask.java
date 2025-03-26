@@ -1,9 +1,12 @@
 public class SubTask extends Task {
-    EpicTask parentEpicTask;
+    private long epicId;  // Храним только ID эпика
 
-    public SubTask(String name, String description, StatusEnum status, EpicTask parentEpicTask) {
+    public SubTask(String name, String description, StatusEnum status, long epicId) {
         super(name, description, status);
-        this.parentEpicTask = parentEpicTask;
+        this.epicId = epicId;
     }
 
+    public long getEpicId() {
+        return epicId;
+    }
 }
