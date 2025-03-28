@@ -8,9 +8,6 @@ public class EpicTask extends Task {
         subTasks = new ArrayList<>();
     }
 
-    public void setStatus(StatusEnum status) {
-    }
-
     public void updateStatus() {
         StatusEnum updatedStatus = StatusEnum.IN_PROGRESS;
         if (subTasks.isEmpty()) updatedStatus = StatusEnum.NEW;

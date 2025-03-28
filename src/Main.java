@@ -37,7 +37,7 @@ public class Main {
                         System.out.println("Введите ID");
                         long deleteTask = scanner.nextInt();
                         System.out.println("Объект удален");
-                        System.out.println(taskManager.removeTask(deleteTask));
+                        taskManager.removeTask(deleteTask);
 
                     } else if (commandTasks == 4) {
 
@@ -94,7 +94,7 @@ public class Main {
                         System.out.println("Введите ID");
                         long deleteEpicTask = scanner.nextInt();
                         System.out.println("Объект удален");
-                        System.out.println(taskManager.removeEpicTask(deleteEpicTask));
+                        taskManager.removeEpicTask(deleteEpicTask);
                     } else if (commandEpicTask == 4) {
 
                         scanner.nextLine();
@@ -124,8 +124,7 @@ public class Main {
                     } else if (commandEpicTask == 6) {
                         System.out.println("Введите ID");
                         long idEpicTask = scanner.nextInt();
-                        EpicTask epicTask = taskManager.getEpicTask(idEpicTask);
-                        System.out.println(epicTask.subTasks);
+                        System.out.println(taskManager.getSubTasks(idEpicTask));
                     }
                     break;
                 case 3:
@@ -153,7 +152,7 @@ public class Main {
                             System.out.println("Введите ID");
                             long deleteSubTask = scanner.nextInt();
                             System.out.println("Объект удален");
-                            System.out.println(taskManager.removeSubTask(deleteSubTask));
+                            taskManager.removeSubTask(deleteSubTask);
 
                         } else if (commandSubTask == 4) {
 
