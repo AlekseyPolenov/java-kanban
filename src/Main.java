@@ -1,10 +1,11 @@
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args) {
-        TaskManager taskManager = new TaskManager();
+        TaskManager inMemoryTaskManager = Managers.getDefault();
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
@@ -14,7 +15,7 @@ public class Main {
             switch (command) {
                 case 1:
                     System.out.println("Задачи");
-                    ArrayList<Task> tasks = taskManager.getTasks();
+                    ArrayList<Task> tasks = inMemoryTaskManager.getTasks();
                     System.out.println(tasks);
                     System.out.println("1 - Удалить все задачи \n2 - Получить по индификатору " +
                                        "\n3 - Удалить по индификатору \n4 - Создать задачу" +
@@ -25,19 +26,19 @@ public class Main {
                     if (commandTasks == 1) {
 
                         System.out.println("Удаление...");
-                        taskManager.deleteTask();
+                        inMemoryTaskManager.deleteTask();
 
                     } else if (commandTasks == 2) {
                         System.out.println("Введите ID");
                         int idTask = scanner.nextInt();
-                        System.out.println(taskManager.getTask(idTask));
+                        System.out.println(inMemoryTaskManager.getTask(idTask));
 
                     } else if (commandTasks == 3) {
 
                         System.out.println("Введите ID");
                         long deleteTask = scanner.nextInt();
                         System.out.println("Объект удален");
-                        taskManager.removeTask(deleteTask);
+                        inMemoryTaskManager.removeTask(deleteTask);
 
                     } else if (commandTasks == 4) {
 
@@ -50,14 +51,14 @@ public class Main {
                         StatusEnum statusEnum = StatusEnum.valueOf(scanner.next());
 
                         Task newTask = new Task(name, description, statusEnum);
-                        taskManager.addTask(newTask);
+                        inMemoryTaskManager.addTask(newTask);
 
                     } else if (commandTasks == 5) {
 
                         scanner.nextLine();
                         System.out.println("Введите ID");
                         long idTask = scanner.nextInt();
-                        Task task = taskManager.getTask(idTask);
+                        Task task = inMemoryTaskManager.getTask(idTask);
                         System.out.println("Введите название задачи");
                         scanner.nextLine();
                         task.setName(scanner.nextLine());
@@ -70,7 +71,7 @@ public class Main {
 
                 case 2:
                     System.out.println("Эпики");
-                    ArrayList<EpicTask> epicTasks = taskManager.getEpicTasks();
+                    ArrayList<EpicTask> epicTasks = inMemoryTaskManager.getEpicTasks();
                     System.out.println(epicTasks);
                     System.out.println("1 - Удалить все задачи \n2 - Получить по индификатору " +
                             "\n3 - Удалить по индификатору \n4 - Создать задачу" +
@@ -81,20 +82,20 @@ public class Main {
                     if (commandEpicTask == 1) {
 
                         System.out.println("Удаление...");
-                        taskManager.deleteEpicTask();
+                        inMemoryTaskManager.deleteEpicTask();
 
                     } else if (commandEpicTask == 2) {
 
                         System.out.println("Введите ID");
                         int idEpicTask = scanner.nextInt();
-                        System.out.println(taskManager.getEpicTask(idEpicTask));
+                        System.out.println(inMemoryTaskManager.getEpicTask(idEpicTask));
 
                     } else if (commandEpicTask == 3) {
 
                         System.out.println("Введите ID");
                         long deleteEpicTask = scanner.nextInt();
                         System.out.println("Объект удален");
-                        taskManager.removeEpicTask(deleteEpicTask);
+                        inMemoryTaskManager.removeEpicTask(deleteEpicTask);
                     } else if (commandEpicTask == 4) {
 
                         scanner.nextLine();
@@ -104,7 +105,7 @@ public class Main {
                         String description = scanner.nextLine();
 
                         EpicTask newEpicTask = new EpicTask(name, description, StatusEnum.NEW);
-                        taskManager.addEpicTask(newEpicTask);
+                        inMemoryTaskManager.addEpicTask(newEpicTask);
 
                     } else if (commandEpicTask == 5) {
 
@@ -112,7 +113,7 @@ public class Main {
 
                         System.out.println("Введите ID");
                         long idEpicTask = scanner.nextInt();
-                        EpicTask epicTask = taskManager.getEpicTask(idEpicTask);
+                        EpicTask epicTask = inMemoryTaskManager.getEpicTask(idEpicTask);
 
                         scanner.nextLine();
 
@@ -124,12 +125,12 @@ public class Main {
                     } else if (commandEpicTask == 6) {
                         System.out.println("Введите ID");
                         long idEpicTask = scanner.nextInt();
-                        System.out.println(taskManager.getSubTasks(idEpicTask));
+                        System.out.println(inMemoryTaskManager.getSubTasks(idEpicTask));
                     }
                     break;
                 case 3:
                     System.out.println("Подзадачи");
-                    ArrayList<SubTask> subTasks = taskManager.getSubTasks();
+                    ArrayList<SubTask> subTasks = inMemoryTaskManager.getSubTasks();
                     System.out.println(subTasks);
                     System.out.println("1 - Удалить все подзадачи \n2 - Получить по индификатору " +
                             "\n3 - Удалить по индификатору \n4 - Создать подзадачу" +
@@ -139,29 +140,29 @@ public class Main {
                         if (commandSubTask == 1) {
 
                             System.out.println("Удаление...");
-                            taskManager.deleteSubTask();
+                            inMemoryTaskManager.deleteSubTask();
 
                         } else if (commandSubTask == 2){
 
                             System.out.println("Введите ID");
                             int idSubTask = scanner.nextInt();
-                            System.out.println(taskManager.getSubTask(idSubTask));
+                            System.out.println(inMemoryTaskManager.getSubTask(idSubTask));
 
                         } else if (commandSubTask == 3) {
 
                             System.out.println("Введите ID");
                             long deleteSubTask = scanner.nextInt();
                             System.out.println("Объект удален");
-                            taskManager.removeSubTask(deleteSubTask);
+                            inMemoryTaskManager.removeSubTask(deleteSubTask);
 
                         } else if (commandSubTask == 4) {
 
                             scanner.nextLine();
                             System.out.println("Список задач эпиков");
-                            System.out.println(taskManager.getEpicTasks());
+                            System.out.println(inMemoryTaskManager.getEpicTasks());
                             System.out.println("Напишите ID Эпика к которому хотите добивать подзадачу");
                             long idEpicTask = scanner.nextInt();
-                            EpicTask epicTask = taskManager.getEpicTask(idEpicTask);
+                            EpicTask epicTask = inMemoryTaskManager.getEpicTask(idEpicTask);
 
                             scanner.nextLine();
 
@@ -173,14 +174,14 @@ public class Main {
                             StatusEnum status = StatusEnum.valueOf(scanner.next());
 
                             SubTask subTask = new SubTask(name, description, status, epicTask.getId());
-                            taskManager.addSubTask(subTask);
+                            inMemoryTaskManager.addSubTask(subTask);
 
                         } else if (commandSubTask == 5) {
 
                             scanner.nextLine();
                             System.out.println("Введите ID");
                             long idSubTask = scanner.nextInt();
-                            SubTask subTask = taskManager.getSubTask(idSubTask);
+                            SubTask subTask = inMemoryTaskManager.getSubTask(idSubTask);
 
                             scanner.nextLine();
 
@@ -191,10 +192,15 @@ public class Main {
                             System.out.println("Введите статус NEW, IN_PROGRESS, DONE");
                             StatusEnum status = StatusEnum.valueOf(scanner.next());
                             subTask.setStatus(status);
-                            EpicTask epicTask = taskManager.getEpicTask(subTask.getEpicId());
+                            EpicTask epicTask = inMemoryTaskManager.getEpicTask(subTask.getEpicId());
                             epicTask.updateStatus();
                         }
                         break;
+                case 4:
+                    List<Task> history = inMemoryTaskManager.getTasksHistory();
+                    System.out.println("История просмотренных задач");
+                    System.out.println(history);
+                    break;
                 case 0:
                     return;
             }
@@ -206,6 +212,7 @@ public class Main {
         System.out.println("1 - Работа с задачи");
         System.out.println("2 - Работа с эпиками");
         System.out.println("3 - Работа с подзадачами");
+        System.out.println("4 - Вывести историю просмотра");
         System.out.println("0 - Выход");
     }
 }

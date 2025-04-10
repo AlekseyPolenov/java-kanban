@@ -19,6 +19,7 @@ public class EpicTask extends Task {
     }
 
     private boolean hasAllSubTasksStatus(StatusEnum statusEnum) {
+        if (subTasks.isEmpty()) return false;
         for (SubTask subTask : subTasks) {
             if (subTask.getStatus() != statusEnum) return false;
         }
