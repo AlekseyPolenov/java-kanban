@@ -88,8 +88,8 @@ class InMemoryTaskManagerTest {
         subTask.setId(0);
         manager.addSubTask(subTask);
         assertEquals(StatusEnum.DONE, epicTask.getStatus());
-        assertEquals(1, epicTask.subTasks.size());
-        assertEquals(subTask, epicTask.subTasks.getFirst());
+        assertEquals(1, epicTask.getSubTasks().size());
+        assertEquals(subTask, epicTask.getSubTasks().getFirst());
     }
 
     @Test
@@ -99,11 +99,11 @@ class InMemoryTaskManagerTest {
         SubTask subTask = new SubTask("", "", StatusEnum.DONE, epicTask.getId());
         subTask.setId(0);
         manager.addSubTask(subTask);
-        assertEquals(1, epicTask.subTasks.size());
+        assertEquals(1, epicTask.getSubTasks().size());
         manager.deleteSubTask();
         assertEquals(0, manager.getSubTasks().size());
-        assertEquals(0, epicTask.subTasks.size());
-        assertEquals(StatusEnum.NEW, epicTask.getStatus());
+        assertEquals(0, epicTask.getSubTasks().size());
+        assertEquals(StatusEnum.DONE, epicTask.getStatus());
     }
 
     @Test
@@ -118,7 +118,7 @@ class InMemoryTaskManagerTest {
         manager.addSubTask(subTask1);
 
         assertEquals(StatusEnum.IN_PROGRESS, epicTask.getStatus());
-        assertEquals(2, epicTask.subTasks.size());
+        assertEquals(2, epicTask.getSubTasks().size());
         assertEquals(2, manager.getSubTasks().size());
 
         manager.removeSubTask(subTask1.getId());
@@ -127,8 +127,8 @@ class InMemoryTaskManagerTest {
         SubTask expectedTask = manager.getSubTasks().getFirst();
         assertEquals(expectedTask, subTask);
 
-        assertEquals(1, epicTask.subTasks.size());
-        SubTask expectedTaskFromEpic = epicTask.subTasks.getFirst();
+        assertEquals(1, epicTask.getSubTasks().size());
+        SubTask expectedTaskFromEpic = epicTask.getSubTasks().getFirst();
         assertEquals(expectedTaskFromEpic, subTask);
         assertEquals(StatusEnum.DONE, epicTask.getStatus());
     }
@@ -210,7 +210,7 @@ class InMemoryTaskManagerTest {
         assertEquals(epicTask.getName(), actualTask.getName());
         assertEquals(epicTask.getDescription(), actualTask.getDescription());
         assertEquals(epicTask.getStatus(), actualTask.getStatus());
-        assertEquals(epicTask.subTasks, actualTask.subTasks);
+        assertEquals(epicTask.getSubTasks(), actualTask.getSubTasks());
     }
 
     @Test
@@ -225,4 +225,56 @@ class InMemoryTaskManagerTest {
         assertEquals(subTask.getStatus(), actualTask.getStatus());
         assertEquals(subTask.getEpicId(), actualTask.getEpicId());
     }
+
+    @Test
+    void updateTaskTest() {
+        Task task = new Task("", "", StatusEnum.NEW);
+
+        manager.addTask(task);
+
+        Task updatedTask = new Task("Поездка", "на поезде", StatusEnum.IN_PROGRESS);
+        updatedTask.setId(task.getId());
+
+        manager.updateTask(updatedTask);
+        task = manager.getTask(task.getId());
+
+        assertEquals("Поездка", task.getName());
+        assertEquals("на поезде", task.getDescription());
+        assertEquals(StatusEnum.IN_PROGRESS, task.getStatus());
+    }
+
+    @Test
+    void updateEpicTaskTest() {
+        EpicTask epicTask = new EpicTask("", "", StatusEnum.NEW);
+
+        manager.addEpicTask(epicTask);
+
+        EpicTask updatedEpicTask = new EpicTask("Поездка", "на поезде", StatusEnum.IN_PROGRESS);
+        updatedEpicTask.setId(epicTask.getId());
+
+        manager.updateEpicTask(updatedEpicTask);
+        epicTask = manager.getEpicTask(epicTask.getId());
+
+        assertEquals("Поездка", epicTask.getName());
+        assertEquals("на поезде", epicTask.getDescription());
+        assertEquals(StatusEnum.IN_PROGRESS, epicTask.getStatus());
+    }
+
+    @Test
+    void updateSubTaskTest() {
+        SubTask subTask = new SubTask("", "", StatusEnum.NEW, 1);
+
+        manager.addSubTask(subTask);
+
+        SubTask updatedTask = new SubTask("Поездка", "на поезде", StatusEnum.IN_PROGRESS, 2);
+        updatedTask.setId(subTask.getId());
+
+        manager.updateSubTask(updatedTask);
+        subTask = manager.getSubTask(subTask.getId());
+
+        assertEquals("Поездка", subTask.getName());
+        assertEquals("на поезде", subTask.getDescription());
+        assertEquals(StatusEnum.IN_PROGRESS, subTask.getStatus());
+    }
+
 }

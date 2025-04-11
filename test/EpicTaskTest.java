@@ -7,10 +7,10 @@ class EpicTaskTest {
     void testUpdateStatus() {
         EpicTask epicTask = new EpicTask("", "", StatusEnum.DONE);
         epicTask.updateStatus();
-        assertEquals(StatusEnum.NEW, epicTask.getStatus());
+        assertEquals(StatusEnum.DONE, epicTask.getStatus());
 
         SubTask subTask = new SubTask("", "", StatusEnum.DONE, epicTask.getId());
-        epicTask.subTasks.add(subTask);
+        epicTask.getSubTasks().add(subTask);
         epicTask.updateStatus();
         assertEquals(StatusEnum.DONE, epicTask.getStatus());
 

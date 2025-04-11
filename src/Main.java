@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -15,7 +14,7 @@ public class Main {
             switch (command) {
                 case 1:
                     System.out.println("Задачи");
-                    ArrayList<Task> tasks = inMemoryTaskManager.getTasks();
+                    List<Task> tasks = inMemoryTaskManager.getTasks();
                     System.out.println(tasks);
                     System.out.println("1 - Удалить все задачи \n2 - Получить по индификатору " +
                                        "\n3 - Удалить по индификатору \n4 - Создать задачу" +
@@ -58,20 +57,24 @@ public class Main {
                         scanner.nextLine();
                         System.out.println("Введите ID");
                         long idTask = scanner.nextInt();
-                        Task task = inMemoryTaskManager.getTask(idTask);
-                        System.out.println("Введите название задачи");
                         scanner.nextLine();
-                        task.setName(scanner.nextLine());
+                        System.out.println("Введите название задачи");
+                        String name = scanner.nextLine();
                         System.out.println("Введите описание задачи");
-                        task.setDescription(scanner.nextLine());
+                        String description = scanner.nextLine();
+                        System.out.println("Введите статус задачи NEW, IN_PROGRESS, DONE");
                         StatusEnum status = StatusEnum.valueOf(scanner.next());
-                        task.setStatus(status);
+
+                        Task task = new Task(name, description, status);
+                        task.setId(idTask);
+
+                        inMemoryTaskManager.updateTask(task);
                     }
                     break;
 
                 case 2:
                     System.out.println("Эпики");
-                    ArrayList<EpicTask> epicTasks = inMemoryTaskManager.getEpicTasks();
+                    List<EpicTask> epicTasks = inMemoryTaskManager.getEpicTasks();
                     System.out.println(epicTasks);
                     System.out.println("1 - Удалить все задачи \n2 - Получить по индификатору " +
                             "\n3 - Удалить по индификатору \n4 - Создать задачу" +
@@ -110,17 +113,20 @@ public class Main {
                     } else if (commandEpicTask == 5) {
 
                         scanner.nextLine();
-
                         System.out.println("Введите ID");
-                        long idEpicTask = scanner.nextInt();
-                        EpicTask epicTask = inMemoryTaskManager.getEpicTask(idEpicTask);
-
+                        long idTask = scanner.nextInt();
                         scanner.nextLine();
+                        System.out.println("Введите название епика");
+                        String name = scanner.nextLine();
+                        System.out.println("Введите описание епика");
+                        String description = scanner.nextLine();
+                        System.out.println("Введите статус епика NEW, IN_PROGRESS, DONE");
+                        StatusEnum status = StatusEnum.valueOf(scanner.next());
 
-                        System.out.println("Введите название задачи");
-                        epicTask.setName(scanner.nextLine());
-                        System.out.println("Введите описание задачи");
-                        epicTask.setDescription(scanner.nextLine());
+                        EpicTask task = new EpicTask(name, description, status);
+                        task.setId(idTask);
+
+                        inMemoryTaskManager.updateEpicTask(task);
 
                     } else if (commandEpicTask == 6) {
                         System.out.println("Введите ID");
@@ -130,7 +136,7 @@ public class Main {
                     break;
                 case 3:
                     System.out.println("Подзадачи");
-                    ArrayList<SubTask> subTasks = inMemoryTaskManager.getSubTasks();
+                    List<SubTask> subTasks = inMemoryTaskManager.getSubTasks();
                     System.out.println(subTasks);
                     System.out.println("1 - Удалить все подзадачи \n2 - Получить по индификатору " +
                             "\n3 - Удалить по индификатору \n4 - Создать подзадачу" +
@@ -178,22 +184,23 @@ public class Main {
 
                         } else if (commandSubTask == 5) {
 
+
                             scanner.nextLine();
                             System.out.println("Введите ID");
-                            long idSubTask = scanner.nextInt();
-                            SubTask subTask = inMemoryTaskManager.getSubTask(idSubTask);
-
+                            long idTask = scanner.nextInt();
                             scanner.nextLine();
-
-                            System.out.println("Введите название задачи");
-                            subTask.setName(scanner.nextLine());
-                            System.out.println("Введите описание задачи");
-                            subTask.setDescription(scanner.nextLine());
-                            System.out.println("Введите статус NEW, IN_PROGRESS, DONE");
+                            System.out.println("Введите название сабтаски");
+                            String name = scanner.nextLine();
+                            System.out.println("Введите описание сабтаски");
+                            String description = scanner.nextLine();
+                            System.out.println("Введите статус сабтаски NEW, IN_PROGRESS, DONE");
                             StatusEnum status = StatusEnum.valueOf(scanner.next());
-                            subTask.setStatus(status);
-                            EpicTask epicTask = inMemoryTaskManager.getEpicTask(subTask.getEpicId());
-                            epicTask.updateStatus();
+
+
+                            SubTask subTask = new SubTask(name, description, status, 0);
+                            subTask.setId(idTask);
+
+                            inMemoryTaskManager.updateSubTask(subTask);
                         }
                         break;
                 case 4:

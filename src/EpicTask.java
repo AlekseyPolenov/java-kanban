@@ -1,7 +1,9 @@
 import java.util.ArrayList;
+import java.util.List;
 
 public class EpicTask extends Task {
-    ArrayList<SubTask> subTasks;
+
+    private List<SubTask> subTasks;
 
     public EpicTask(String name, String description, StatusEnum status) {
         super(name, description, status);
@@ -10,7 +12,7 @@ public class EpicTask extends Task {
 
     public void updateStatus() {
         StatusEnum updatedStatus = StatusEnum.IN_PROGRESS;
-        if (subTasks.isEmpty()) updatedStatus = StatusEnum.NEW;
+        if (subTasks.isEmpty()) return;
 
         if (hasAllSubTasksStatus(StatusEnum.DONE)) updatedStatus =  StatusEnum.DONE;
 
@@ -19,12 +21,15 @@ public class EpicTask extends Task {
     }
 
     private boolean hasAllSubTasksStatus(StatusEnum statusEnum) {
-        if (subTasks.isEmpty()) return false;
         for (SubTask subTask : subTasks) {
             if (subTask.getStatus() != statusEnum) return false;
         }
 
         return true;
+    }
+
+    public List<SubTask> getSubTasks() {
+        return subTasks;
     }
 
 }
