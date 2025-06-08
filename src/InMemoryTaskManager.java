@@ -18,7 +18,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
 
-    private long getGenerateId(){
+    private long getGenerateId() {
         generateId++;
         return generateId;
     }
