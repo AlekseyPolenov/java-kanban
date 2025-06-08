@@ -1,23 +1,33 @@
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
-    private List<Task> tasksHistory;
+    private LinkedHashMap<Long, Task> tasksHistory;
 
     public InMemoryHistoryManager() {
-        tasksHistory = new ArrayList<>();
+        tasksHistory = new LinkedHashMap<>();
     }
 
     @Override
     public List<Task> getTasksHistory() {
-        return tasksHistory;
+        return tasksHistory.values().stream().toList();
     }
 
     @Override
     public void addTaskHistory(Task task) {
-        tasksHistory.add(task);
-        if (tasksHistory.size() > 10) {
-            tasksHistory.removeFirst();
+        if (task == null) return;
+
+        long taskId = task.getId();
+
+        if (tasksHistory.containsKey(taskId)) {
+            removeTaskHistory(taskId);
         }
+
+        tasksHistory.put(taskId, task);
+    }
+
+    @Override
+    public void removeTaskHistory(Long id) {
+        tasksHistory.remove(id);
     }
 }
