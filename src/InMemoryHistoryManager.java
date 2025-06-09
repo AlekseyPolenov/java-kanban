@@ -1,16 +1,39 @@
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class InMemoryHistoryManager implements HistoryManager {
-    private LinkedHashMap<Long, Task> tasksHistory;
+
+    private static class Node {
+        Task task;
+        Node next;
+        Node prev;
+
+        Node(Node prev, Task task, Node next) {
+            this.task = task;
+            this.next = next;
+            this.prev = prev;
+        }
+    }
+
+    private final Map<Long, Node> taskNodesHistory;
+    private Node firstTaskNode;
+    private Node lastTaskNode;
 
     public InMemoryHistoryManager() {
-        tasksHistory = new LinkedHashMap<>();
+        taskNodesHistory = new LinkedHashMap<>();
     }
 
     @Override
     public List<Task> getTasksHistory() {
-        return tasksHistory.values().stream().toList();
+        List<Task> result = new ArrayList<>();
+        Node current = firstTaskNode;
+        while (current != null) {
+            result.add(current.task);
+            current = current.next;
+        }
+        return result;
     }
 
     @Override
@@ -18,16 +41,50 @@ public class InMemoryHistoryManager implements HistoryManager {
         if (task == null) return;
 
         long taskId = task.getId();
+        removeTaskHistory(taskId); // Удаляем если уже есть
 
-        if (tasksHistory.containsKey(taskId)) {
-            removeTaskHistory(taskId);
+        linkLast(task);
+        taskNodesHistory.put(taskId, lastTaskNode);
+    }
+
+    private void linkLast(Task task) {
+        final Node l = lastTaskNode;
+        final Node newNode = new Node(l, task, null);
+        lastTaskNode = newNode;
+        if (l == null) {
+            firstTaskNode = newNode;
+        } else {
+            l.next = newNode;
+        }
+    }
+
+    private void unlink(Node node) {
+        final Node next = node.next;
+        final Node prev = node.prev;
+
+        if (prev == null) {
+            firstTaskNode = next;
+        } else {
+            prev.next = next;
+            node.prev = null;
         }
 
-        tasksHistory.put(taskId, task);
+        if (next == null) {
+            lastTaskNode = prev;
+        } else {
+            next.prev = prev;
+            node.next = null;
+        }
+
+        node.task = null;
     }
 
     @Override
     public void removeTaskHistory(Long id) {
-        tasksHistory.remove(id);
+        Node node = taskNodesHistory.get(id);
+        if (node != null) {
+            unlink(node);
+            taskNodesHistory.remove(id);
+        }
     }
 }
