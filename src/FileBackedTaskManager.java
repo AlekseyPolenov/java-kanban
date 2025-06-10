@@ -5,13 +5,13 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final Path file;
 
-    public FileBackedTaskManager() {
-        this.file = Paths.get("backup.csv");
+    public FileBackedTaskManager(Path file) {
+
+        this.file = file;
         if (file.toFile().exists()) {
             this.loadFromFile(file);
         }
@@ -148,11 +148,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 Task task = fromCsvString(line);
                 if (task != null) {
                     if (task instanceof EpicTask) {
-                        addEpicTask((EpicTask) task);
+                        taskEpicMap.put(task.getId(), (EpicTask) task);
                     } else if (task instanceof SubTask) {
-                        addSubTask((SubTask) task);
+                        SubTask subTask = (SubTask) task;
+                        subTaskMap.put(task.getId(), subTask);
+                        taskEpicMap.get(subTask.getEpicId())
+                                .getSubTasks()
+                                .add(subTask);
                     } else {
-                        addTask(task);
+                        taskMap.put(task.getId(), task);
                     }
                 }
             }
@@ -180,8 +184,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 epicTask.setId(id);
                 return epicTask;
             case "SubTask":
-                long parentEpicId = Long.parseLong(fields.length > 5 ? fields[5] : "");
-                return new SubTask(name, description, status, parentEpicId);
+                if (fields.length > 5) {
+                    long parentEpicId = Long.parseLong(fields[5]);
+                    SubTask subTask = new SubTask(name, description, status, parentEpicId);
+                    subTask.setId(id);
+                    return subTask;
+                }
+                return null;
             default:
                 return null;
         }

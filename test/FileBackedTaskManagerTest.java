@@ -1,6 +1,7 @@
 import org.junit.jupiter.api.*;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -8,16 +9,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FileBackedTaskManagerTest {
 
+    private Path tempPath = Paths.get("backup.csv");
     private FileBackedTaskManager manager;
 
     @BeforeEach
     void setUp() {
-        manager = new FileBackedTaskManager();
+        manager = new FileBackedTaskManager(tempPath);
     }
 
     @AfterEach
     void cleanUp() throws IOException {
-        Files.deleteIfExists(Paths.get("backup.csv"));
+        Files.deleteIfExists(tempPath);
     }
 
     @Test
@@ -26,7 +28,7 @@ class FileBackedTaskManagerTest {
         task.setId(0);
         manager.addTask(task);
 
-        FileBackedTaskManager loadedManager = new FileBackedTaskManager();
+        FileBackedTaskManager loadedManager = new FileBackedTaskManager(tempPath);
 
         assertEquals(1, loadedManager.getTasks().size());
         assertEquals(task, loadedManager.getTask(1));
@@ -38,7 +40,7 @@ class FileBackedTaskManagerTest {
         epic.setId(0);
         manager.addEpicTask(epic);
 
-        FileBackedTaskManager loadedManager = new FileBackedTaskManager();
+        FileBackedTaskManager loadedManager = new FileBackedTaskManager(tempPath);
 
         assertEquals(1, loadedManager.getEpicTasks().size());
         assertEquals(epic, loadedManager.getEpicTask(1));
@@ -54,7 +56,7 @@ class FileBackedTaskManagerTest {
         manager.addEpicTask(epic);
         manager.addSubTask(subTask);
 
-        FileBackedTaskManager loadedManager = new FileBackedTaskManager();
+        FileBackedTaskManager loadedManager = new FileBackedTaskManager(tempPath);
 
         assertEquals(1, loadedManager.getSubTasks().size());
         assertEquals(subTask, loadedManager.getSubTask(2));
@@ -70,7 +72,7 @@ class FileBackedTaskManagerTest {
         task.setStatus(StatusEnum.IN_PROGRESS);
         manager.updateTask(task);
 
-        FileBackedTaskManager loadedManager = new FileBackedTaskManager();
+        FileBackedTaskManager loadedManager = new FileBackedTaskManager(tempPath);
 
         assertEquals(StatusEnum.IN_PROGRESS, loadedManager.getTask(1).getStatus());
     }
@@ -82,7 +84,7 @@ class FileBackedTaskManagerTest {
         manager.addTask(task);
         manager.removeTask(1);
 
-        FileBackedTaskManager loadedManager = new FileBackedTaskManager();
+        FileBackedTaskManager loadedManager = new FileBackedTaskManager(tempPath);
 
         assertTrue(loadedManager.getTasks().isEmpty());
     }
@@ -101,7 +103,7 @@ class FileBackedTaskManagerTest {
         manager.addTask(task2);
         manager.addEpicTask(epic);
 
-        FileBackedTaskManager loadedManager = new FileBackedTaskManager();
+        FileBackedTaskManager loadedManager = new FileBackedTaskManager(tempPath);
 
         List<Task> tasks = loadedManager.getTasks();
         assertEquals(1, tasks.get(0).getId());
