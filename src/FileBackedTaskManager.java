@@ -1,3 +1,6 @@
+import exceptions.ManagerLoadException;
+import exceptions.ManagerSaveException;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -182,17 +185,5 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             default:
                 return null;
         }
-    }
-}
-
-class ManagerSaveException extends RuntimeException {
-    public ManagerSaveException(String message, Throwable cause) {
-        super(message, cause);
-    }
-}
-
-class ManagerLoadException extends RuntimeException {
-    public ManagerLoadException(String message, Throwable cause) {
-        super(message, cause);
     }
 }
