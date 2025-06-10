@@ -1,6 +1,8 @@
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class InMemoryTaskManagerTest {
@@ -35,15 +37,26 @@ class InMemoryTaskManagerTest {
 
     @Test
     void removeTask() {
-        Task task = new Task("", "", StatusEnum.NEW);
-        Task task1 = new Task("", "", StatusEnum.NEW);
-        manager.addTask(task);
+        Task task1 = new Task("1", "1", StatusEnum.NEW);
+        Task task2 = new Task("2", "2", StatusEnum.NEW);
+
         manager.addTask(task1);
+        manager.addTask(task2);
+        manager.getTask(task1.getId());
+
         assertEquals(2, manager.getTasks().size());
-        manager.removeTask(task.getId());
+
+        List<Task> histories = manager.getTasksHistory();
+        assertEquals(1, histories.size());
+        assertEquals(task1, histories.getFirst());
+
+        manager.removeTask(task1.getId());
+
         assertEquals(1, manager.getTasks().size());
         Task expectedTask = manager.getTasks().getFirst();
-        assertEquals(expectedTask, task1);
+        assertEquals(expectedTask, task2);
+
+        assertEquals(0, manager.getTasksHistory().size());
     }
 
     @Test
@@ -69,15 +82,26 @@ class InMemoryTaskManagerTest {
 
     @Test
     void removeEpicTask() {
-        EpicTask epicTask = new EpicTask("", "", StatusEnum.NEW);
-        EpicTask epicTask1 = new EpicTask("", "", StatusEnum.NEW);
+        EpicTask epicTask = new EpicTask("0", "0", StatusEnum.NEW);
+        EpicTask epicTask1 = new EpicTask("1", "1", StatusEnum.NEW);
+
         manager.addEpicTask(epicTask);
         manager.addEpicTask(epicTask1);
+        manager.getEpicTask(epicTask.getId());
+
         assertEquals(2, manager.getEpicTasks().size());
+
+        List<Task> histories = manager.getTasksHistory();
+        assertEquals(1, histories.size());
+        assertEquals(epicTask, histories.getFirst());
+
         manager.removeEpicTask(epicTask.getId());
+
         assertEquals(1, manager.getEpicTasks().size());
         EpicTask expectedTask = manager.getEpicTasks().getFirst();
         assertEquals(expectedTask, epicTask1);
+
+        assertEquals(0, manager.getTasksHistory().size());
     }
 
     @Test
@@ -108,18 +132,23 @@ class InMemoryTaskManagerTest {
 
     @Test
     void removeSubTask() {
-        EpicTask epicTask = new EpicTask("", "", StatusEnum.NEW);
+        EpicTask epicTask = new EpicTask("12", "12", StatusEnum.NEW);
         manager.addEpicTask(epicTask);
 
-        SubTask subTask = new SubTask("", "", StatusEnum.DONE, epicTask.getId());
-        SubTask subTask1 = new SubTask("", "", StatusEnum.IN_PROGRESS, epicTask.getId());
+        SubTask subTask = new SubTask("0", "0", StatusEnum.DONE, epicTask.getId());
+        SubTask subTask1 = new SubTask("1", "1", StatusEnum.IN_PROGRESS, epicTask.getId());
 
         manager.addSubTask(subTask);
         manager.addSubTask(subTask1);
+        manager.getSubTask(subTask.getId());
 
         assertEquals(StatusEnum.IN_PROGRESS, epicTask.getStatus());
         assertEquals(2, epicTask.getSubTasks().size());
         assertEquals(2, manager.getSubTasks().size());
+
+        List<Task> histories = manager.getTasksHistory();
+        assertEquals(1, histories.size());
+        assertEquals(subTask, histories.getFirst());
 
         manager.removeSubTask(subTask1.getId());
 
@@ -131,12 +160,17 @@ class InMemoryTaskManagerTest {
         SubTask expectedTaskFromEpic = epicTask.getSubTasks().getFirst();
         assertEquals(expectedTaskFromEpic, subTask);
         assertEquals(StatusEnum.DONE, epicTask.getStatus());
+
+        manager.removeSubTask(subTask.getId());
+
+        assertEquals(0, manager.getTasksHistory().size());
     }
 
     @Test
     void getTask() {
         Task task = new Task("", "", StatusEnum.DONE);
         manager.addTask(task);
+
         assertEquals(0, manager.getTasksHistory().size());
 
         Task actualTask = manager.getTask(task.getId());
@@ -145,6 +179,10 @@ class InMemoryTaskManagerTest {
         assertEquals(1, manager.getTasksHistory().size());
         Task actualFromHistory = manager.getTasksHistory().getFirst();
         assertEquals(task, actualFromHistory);
+
+        List<Task> histories = manager.getTasksHistory();
+        assertEquals(1, histories.size());
+        assertEquals(task, histories.getFirst());
     }
 
     @Test
@@ -159,6 +197,10 @@ class InMemoryTaskManagerTest {
         assertEquals(1, manager.getTasksHistory().size());
         Task actualFromHistory = manager.getTasksHistory().getFirst();
         assertEquals(epicTask, actualFromHistory);
+
+        List<Task> histories = manager.getTasksHistory();
+        assertEquals(1, histories.size());
+        assertEquals(epicTask, histories.getFirst());
     }
 
     @Test
@@ -175,6 +217,10 @@ class InMemoryTaskManagerTest {
         assertEquals(1, manager.getTasksHistory().size());
         Task actualFromHistory = manager.getTasksHistory().getFirst();
         assertEquals(subTask, actualFromHistory);
+
+        List<Task> histories = manager.getTasksHistory();
+        assertEquals(1, histories.size());
+        assertEquals(subTask, histories.getFirst());
     }
 
     @Test
@@ -276,5 +322,4 @@ class InMemoryTaskManagerTest {
         assertEquals("на поезде", subTask.getDescription());
         assertEquals(StatusEnum.IN_PROGRESS, subTask.getStatus());
     }
-
 }

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class InMemoryHistoryManagerTest {
 
@@ -17,30 +18,57 @@ class InMemoryHistoryManagerTest {
 
     @Test
     void addTaskHistory() {
-        Task task1 = new Task("", "", StatusEnum.NEW);
-        task1.setId(0);
-        assertEquals(0, manager.getTasksHistory().size());
+        Task task1 = new Task("111", "1", StatusEnum.NEW);
+        task1.setId(1);
+        Task task2 = new Task("222", "2", StatusEnum.IN_PROGRESS);
+        task2.setId(2);
+        Task task3 = new Task("3", "3", StatusEnum.DONE);
+        task3.setId(0);
 
         manager.addTaskHistory(task1);
+        manager.addTaskHistory(task2);
+        manager.addTaskHistory(task3);
 
-        assertEquals(1, manager.getTasksHistory().size());
+        task1.setName("1_Copy");
+        task1.setDescription("1_Copy");
+        task1.setStatus(StatusEnum.DONE);
 
-        for (int i = 1; i < 10; i++) {
-            Task task = new Task("", "", StatusEnum.NEW);
-            task.setId(i);
-            manager.addTaskHistory(task);
-        }
+        manager.addTaskHistory(task1);
+        manager.addTaskHistory(task1);
+        manager.addTaskHistory(task1);
 
-        assertEquals(10, manager.getTasksHistory().size());
+        List<Task> histories = manager.getTasksHistory();
 
-        Task task11 = new Task("", "", StatusEnum.NEW);
-        task11.setId(11);
+        assertEquals(3, histories.size());
+        assertEquals(histories.get(0), task2);
+        assertEquals(histories.get(1), task3);
+        assertEquals(histories.get(2), task1);
+    }
 
-        manager.addTaskHistory(task11);
+    @Test
+    void addTaskHistoryWithNullTask() {
+        manager.addTaskHistory(null);
 
-        assertEquals(10, manager.getTasksHistory().size());
-        List<Task> tasksHistory = manager.getTasksHistory();
-        assertFalse(tasksHistory.contains(task1));
-        assertTrue(tasksHistory.contains(task11));
+        assertEquals(0, manager.getTasksHistory().size());
+    }
+
+    @Test
+    void removeTaskHistory() {
+        Task task1 = new Task("111", "1", StatusEnum.NEW);
+        task1.setId(0);
+        Task task2 = new Task("222", "2", StatusEnum.IN_PROGRESS);
+        task2.setId(1);
+
+        manager.addTaskHistory(task1);
+        manager.addTaskHistory(task2);
+
+        assertEquals(2, manager.getTasksHistory().size());
+
+        manager.removeTaskHistory(0L);
+
+        List<Task> histories = manager.getTasksHistory();
+
+        assertEquals(1, histories.size());
+        assertFalse(histories.contains(task1));
     }
 }

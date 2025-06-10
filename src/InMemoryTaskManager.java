@@ -18,7 +18,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
 
-    private long getGenerateId(){
+    private long getGenerateId() {
         generateId++;
         return generateId;
     }
@@ -37,6 +37,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeTask(long deleteTask) {
        taskMap.remove(deleteTask);
+       historyManager.removeTaskHistory(deleteTask);
     }
 
     @Override
@@ -59,6 +60,8 @@ public class InMemoryTaskManager implements TaskManager {
                 subTaskMap.remove(subTask.getId());
             }
         }
+
+        historyManager.removeTaskHistory(deleteEpicTask);
     }
 
     @Override
@@ -75,7 +78,6 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteSubTask() {
-
         for (EpicTask epic : taskEpicMap.values()) {
             for (SubTask subTask : epic.getSubTasks()) {
                 subTaskMap.remove(subTask.getId());
@@ -96,6 +98,8 @@ public class InMemoryTaskManager implements TaskManager {
                 epic.updateStatus();
             }
         }
+
+        historyManager.removeTaskHistory(deleteSubTask);
     }
 
     @Override

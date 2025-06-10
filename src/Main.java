@@ -148,7 +148,7 @@ public class Main {
                             System.out.println("Удаление...");
                             inMemoryTaskManager.deleteSubTask();
 
-                        } else if (commandSubTask == 2){
+                        } else if (commandSubTask == 2) {
 
                             System.out.println("Введите ID");
                             int idSubTask = scanner.nextInt();
