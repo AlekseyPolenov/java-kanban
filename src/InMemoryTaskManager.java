@@ -5,9 +5,9 @@ import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
     private long generateId = 0;
-    private Map<Long, Task> taskMap;
-    private Map<Long, EpicTask> taskEpicMap;
-    private Map<Long, SubTask> subTaskMap;
+    protected Map<Long, Task> taskMap;
+    protected Map<Long, EpicTask> taskEpicMap;
+    protected Map<Long, SubTask> subTaskMap;
     private HistoryManager historyManager;
 
     public InMemoryTaskManager() {

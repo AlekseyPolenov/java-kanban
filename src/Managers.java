@@ -1,6 +1,8 @@
+import java.nio.file.Paths;
+
 public class Managers {
     public static TaskManager getDefault() {
-        return new InMemoryTaskManager();
+        return new FileBackedTaskManager(Paths.get("backup.csv"));
     }
 
     public static HistoryManager getDefaultHistory() {
