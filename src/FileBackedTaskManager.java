@@ -5,15 +5,24 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final Path file;
 
     public FileBackedTaskManager(Path file) {
-
         this.file = file;
-        if (file.toFile().exists()) {
-            this.loadFromFile(file);
+        try {
+            if (file.toFile().exists()) {
+                this.loadFromFile(file);
+            } else {
+                throw new ManagerLoadException("Файл не существует: " + file, null);
+            }
+        } catch (ManagerLoadException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ManagerLoadException("Ошибка при загрузке из файла", e);
         }
     }
 
@@ -90,7 +99,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         saveToFile();
     }
 
-    private void saveToFile() {
+    protected void saveToFile() {
         try (BufferedWriter writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
 
             writer.write("id,type,name,status,description,epic");
@@ -115,19 +124,21 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-    private String taskToCsvString(Task task) {
+    protected String taskToCsvString(Task task) {
         String[] fields = new String[] {
                 String.valueOf(task.getId()),
                 getType(task),
                 task.getName(),
                 task.getStatus().toString(),
                 task.getDescription(),
-                task instanceof SubTask ? String.valueOf(((SubTask) task).getEpicId()) : ""
+                task instanceof SubTask ? String.valueOf(((SubTask) task).getEpicId()) : "",
+                task.getStartTime() != null ? task.getStartTime().toString() : "",
+                task.getDuration() != null ? String.valueOf(task.getDuration().toMinutes()) : ""
         };
         return String.join(",", fields);
     }
 
-    private String getType(Task task) {
+    protected String getType(Task task) {
         if (task instanceof EpicTask) {
             return "EpicTask";
         } else if (task instanceof SubTask) {
@@ -165,7 +176,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-    private Task fromCsvString(String value) {
+    protected Task fromCsvString(String value) {
         String[] fields = value.split(",");
 
         long id = Long.parseLong(fields[0]);
@@ -174,9 +185,14 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         StatusEnum status = StatusEnum.valueOf(fields[3]);
         String description = fields[4];
 
+        LocalDateTime startTime = fields.length > 6 && !fields[6].isEmpty()
+                ? LocalDateTime.parse(fields[6]) : null;
+        Duration duration = fields.length > 7 && !fields[7].isEmpty()
+                ? Duration.ofMinutes(Long.parseLong(fields[7])) : null;
+
         switch (type) {
             case "Task":
-                Task task = new Task(name, description, status);
+                Task task = new Task(name, description, status, startTime, duration);
                 task.setId(id);
                 return task;
             case "EpicTask":
@@ -186,7 +202,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             case "SubTask":
                 if (fields.length > 5) {
                     long parentEpicId = Long.parseLong(fields[5]);
-                    SubTask subTask = new SubTask(name, description, status, parentEpicId);
+                    SubTask subTask = new SubTask(name, description, status, startTime, duration, parentEpicId);
                     subTask.setId(id);
                     return subTask;
                 }

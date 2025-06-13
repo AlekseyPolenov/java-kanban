@@ -1,7 +1,7 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class InMemoryTaskManager implements TaskManager {
     private long generateId = 0;
@@ -25,6 +25,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void addTask(Task task) {
+        if (hasTimeOverlap(task)) {
+            throw new IllegalStateException("Задача пересекается по времени с существующей");
+        }
         task.setId(getGenerateId());
         taskMap.put(task.getId(), task);
     }
@@ -72,8 +75,8 @@ public class InMemoryTaskManager implements TaskManager {
         if (epic != null) {
             epic.getSubTasks().add(subTask);
             epic.updateStatus();
+            epic.updateTime();
         }
-
     }
 
     @Override
@@ -179,5 +182,36 @@ public class InMemoryTaskManager implements TaskManager {
         EpicTask epicTask = getEpicTask(subTask.getEpicId());
         if (epicTask == null) return;
         epicTask.updateStatus();
+    }
+
+    @Override
+    public List<Task> getPrioritizedTasks() {
+        return Stream.concat(
+                        Stream.concat(
+                                taskMap.values().stream(),
+                                subTaskMap.values().stream()
+                        ),
+                        taskEpicMap.values().stream()
+                )
+                .filter(task -> task.getStartTime() != null)
+                .sorted(Comparator.comparing(Task::getStartTime))
+                .collect(Collectors.toList());
+    }
+
+    public boolean isTimeOverlap(Task task1, Task task2) {
+        if (task1.getStartTime() == null || task2.getStartTime() == null)
+            return false;
+
+        LocalDateTime start1 = task1.getStartTime();
+        LocalDateTime end1 = task1.getEndTime();
+        LocalDateTime start2 = task2.getStartTime();
+        LocalDateTime end2 = task2.getEndTime();
+
+        return !(end1.isBefore(start2) || end2.isBefore(start1));
+    }
+
+    public boolean hasTimeOverlap(Task newTask) {
+        return getPrioritizedTasks().stream()
+                .anyMatch(existingTask -> isTimeOverlap(newTask, existingTask));
     }
 }
