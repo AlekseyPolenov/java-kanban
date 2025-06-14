@@ -249,8 +249,8 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public List<Task> getPrioritizedTasks() {
-        return List.copyOf(prioritizedTasks);
+    public TreeSet<Task> getPrioritizedTasks() {
+        return prioritizedTasks;
     }
 
     public boolean isTimeOverlap(Task task1, Task task2) {

@@ -3,7 +3,9 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Iterator;
 import java.util.List;
+import java.util.TreeSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -171,7 +173,7 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
         assertNull(manager.getSubTask(subTask1.getId()));
 
         // Проверка содержимого prioritizedTasks
-        List<Task> prioritized = manager.getPrioritizedTasks();
+        TreeSet<Task> prioritized = manager.getPrioritizedTasks();
         assertTrue(prioritized.contains(subTask2));
         assertTrue(prioritized.contains(epic));
 
@@ -416,10 +418,18 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
         manager.addTask(task1);
         manager.addTask(task2);
 
-        List<Task> prioritized = manager.getPrioritizedTasks();
+        TreeSet<Task> prioritized = manager.getPrioritizedTasks();
+
+        Iterator<Task> it = prioritized.iterator();
+
+        Task prioritizedTask1;
+        Task prioritizedTask2;
+
+        prioritizedTask1 = it.next();
+        prioritizedTask2 = it.next();
 
         assertEquals(2, prioritized.size());
-        assertEquals(task2, prioritized.get(0));
-        assertEquals(task1, prioritized.get(1));
+        assertEquals(task2, prioritizedTask1);
+        assertEquals(task1, prioritizedTask2);
     }
 }
