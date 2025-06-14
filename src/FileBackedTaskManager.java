@@ -19,8 +19,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             } else {
                 throw new ManagerLoadException("Файл не существует: " + file, null);
             }
-        } catch (ManagerLoadException e) {
-            throw e;
         } catch (Exception e) {
             throw new ManagerLoadException("Ошибка при загрузке из файла", e);
         }

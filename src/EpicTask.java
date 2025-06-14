@@ -14,9 +14,27 @@ public class EpicTask extends Task {
     }
 
     public void updateTime() {
-        setStartTime(getStartTime());
-        setDuration(getDuration());
+        if (subTasks.isEmpty()) {
+            setStartTime(null);
+            setDuration(null);
+            return;
+        }
+
+        LocalDateTime earliest = subTasks.stream()
+                .map(SubTask::getStartTime)
+                .filter(Objects::nonNull)
+                .min(LocalDateTime::compareTo)
+                .orElse(null);
+
+        Duration totalDuration = subTasks.stream()
+                .map(SubTask::getDuration)
+                .filter(Objects::nonNull)
+                .reduce(Duration.ZERO, Duration::plus);
+
+        setStartTime(earliest);
+        setDuration(totalDuration);
     }
+
 
     @Override
     public LocalDateTime getStartTime() {

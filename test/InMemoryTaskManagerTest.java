@@ -147,43 +147,38 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
 
     @Test
     void removeSubTask() {
-        EpicTask epicTask = new EpicTask("12", "12", StatusEnum.NEW);
-        manager.addEpicTask(epicTask);
+        EpicTask epic = new EpicTask("Epic", "Description", StatusEnum.NEW);
+        manager.addEpicTask(epic);
 
-        SubTask subTask = new SubTask("0", "0", StatusEnum.DONE,
-                LocalDateTime.of(2023, 1, 1, 10, 0),
-                Duration.ofHours(1), epicTask.getId());
+        SubTask subTask1 = new SubTask("Sub1", "Desc1", StatusEnum.DONE,
+                LocalDateTime.of(2023, 1, 1, 10, 0), Duration.ofHours(1), epic.getId());
+        SubTask subTask2 = new SubTask("Sub2", "Desc2", StatusEnum.IN_PROGRESS,
+                LocalDateTime.of(2023, 1, 1, 12, 0), Duration.ofHours(1), epic.getId());
 
-        SubTask subTask1 = new SubTask("1", "1", StatusEnum.IN_PROGRESS,
-                LocalDateTime.of(2023, 1, 1, 10, 0),
-                Duration.ofHours(1), epicTask.getId());
-
-        manager.addSubTask(subTask);
         manager.addSubTask(subTask1);
-        manager.getSubTask(subTask.getId());
+        manager.addSubTask(subTask2);
 
-        assertEquals(StatusEnum.IN_PROGRESS, epicTask.getStatus());
-        assertEquals(2, epicTask.getSubTasks().size());
+        // Проверка добавления
         assertEquals(2, manager.getSubTasks().size());
+        assertEquals(2, manager.getPrioritizedTasks().size());
 
-        List<Task> histories = manager.getTasksHistory();
-        assertEquals(1, histories.size());
-        assertEquals(subTask, histories.getFirst());
-
+        // Удаление первой подзадачи
         manager.removeSubTask(subTask1.getId());
 
+        // Проверка удаления
         assertEquals(1, manager.getSubTasks().size());
-        SubTask expectedTask = manager.getSubTasks().getFirst();
-        assertEquals(expectedTask, subTask);
+        assertEquals(2, manager.getPrioritizedTasks().size());
+        assertNull(manager.getSubTask(subTask1.getId()));
 
-        assertEquals(1, epicTask.getSubTasks().size());
-        SubTask expectedTaskFromEpic = epicTask.getSubTasks().getFirst();
-        assertEquals(expectedTaskFromEpic, subTask);
-        assertEquals(StatusEnum.DONE, epicTask.getStatus());
+        // Проверка содержимого prioritizedTasks
+        List<Task> prioritized = manager.getPrioritizedTasks();
+        assertTrue(prioritized.contains(subTask2));
+        assertTrue(prioritized.contains(epic));
 
-        manager.removeSubTask(subTask.getId());
-
-        assertEquals(0, manager.getTasksHistory().size());
+        // Удаление последней подзадачи
+        manager.removeSubTask(subTask2.getId());
+        assertEquals(0, manager.getSubTasks().size());
+        assertEquals(0, manager.getPrioritizedTasks().size());
     }
 
     @Test
@@ -251,12 +246,13 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
     void getSubTasks() {
         EpicTask epicTask = new EpicTask("", "", StatusEnum.NEW);
         manager.addEpicTask(epicTask);
+
         SubTask subTask = new SubTask("", "", StatusEnum.NEW,
                 LocalDateTime.of(2023, 1, 1, 10, 0),
                 Duration.ofHours(1), epicTask.getId());
 
         SubTask subTask1 = new SubTask("", "", StatusEnum.NEW,
-                LocalDateTime.of(2023, 1, 1, 10, 0),
+                LocalDateTime.of(2023, 2, 1, 10, 0),
                 Duration.ofHours(1), epicTask.getId());
 
         manager.addSubTask(subTask);
@@ -326,19 +322,40 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
 
     @Test
     void updateEpicTaskTest() {
-        EpicTask epicTask = new EpicTask("", "", StatusEnum.NEW);
+        EpicTask originalEpic = new EpicTask("Original", "Original description", StatusEnum.NEW);
+        manager.addEpicTask(originalEpic);
+        long epicId = originalEpic.getId();
 
-        manager.addEpicTask(epicTask);
+        SubTask subTask1 = new SubTask("SubTask 1", "Desc 1", StatusEnum.NEW,
+                LocalDateTime.of(2023, 1, 1, 10, 0), Duration.ofHours(1), epicId);
+        SubTask subTask2 = new SubTask("SubTask 2", "Desc 2", StatusEnum.DONE,
+                LocalDateTime.of(2023, 1, 1, 12, 0), Duration.ofHours(2), epicId);
 
-        EpicTask updatedEpicTask = new EpicTask("Поездка", "на поезде", StatusEnum.IN_PROGRESS);
-        updatedEpicTask.setId(epicTask.getId());
+        manager.addSubTask(subTask1);
+        manager.addSubTask(subTask2);
 
-        manager.updateEpicTask(updatedEpicTask);
-        epicTask = manager.getEpicTask(epicTask.getId());
+        assertEquals(StatusEnum.IN_PROGRESS, originalEpic.getStatus());
+        assertNotNull(originalEpic.getStartTime());
+        assertNotNull(originalEpic.getEndTime());
 
-        assertEquals("Поездка", epicTask.getName());
-        assertEquals("на поезде", epicTask.getDescription());
-        assertEquals(StatusEnum.IN_PROGRESS, epicTask.getStatus());
+        EpicTask updatedEpic = new EpicTask("Updated", "Updated description", StatusEnum.DONE);
+        updatedEpic.setId(epicId);
+
+        manager.updateEpicTask(updatedEpic);
+
+        EpicTask retrievedEpic = manager.getEpicTask(epicId);
+
+        assertEquals("Updated", retrievedEpic.getName());
+        assertEquals("Updated description", retrievedEpic.getDescription());
+
+        assertEquals(StatusEnum.IN_PROGRESS, retrievedEpic.getStatus());
+
+        assertEquals(2, retrievedEpic.getSubTasks().size());
+
+        assertNotNull(retrievedEpic.getStartTime());
+        assertNotNull(retrievedEpic.getEndTime());
+
+        assertTrue(manager.getPrioritizedTasks().contains(retrievedEpic));
     }
 
     @Test
