@@ -47,7 +47,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         taskNodesHistory.put(taskId, lastTaskNode);
     }
 
-    private void linkLast(Task task) {
+    protected void linkLast(Task task) {
         final Node l = lastTaskNode;
         final Node newNode = new Node(l, task, null);
         lastTaskNode = newNode;

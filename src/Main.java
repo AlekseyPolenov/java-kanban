@@ -1,3 +1,6 @@
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Scanner;
 
@@ -36,6 +39,7 @@ public class Main {
 
                         System.out.println("Введите ID");
                         long deleteTask = scanner.nextInt();
+
                         System.out.println("Объект удален");
                         inMemoryTaskManager.removeTask(deleteTask);
 
@@ -44,12 +48,25 @@ public class Main {
                         scanner.nextLine();
                         System.out.println("Введите название задачи");
                         String name = scanner.nextLine();
+
                         System.out.println("Введите описание задачи");
                         String description = scanner.nextLine();
+
                         System.out.println("Введите статус NEW, IN_PROGRESS, DONE");
                         StatusEnum statusEnum = StatusEnum.valueOf(scanner.next());
 
-                        Task newTask = new Task(name, description, statusEnum);
+                        System.out.println("Введите дату начала (yyyy-MM-dd HH:mm)");
+                        scanner.nextLine();
+                        String dateInput = scanner.nextLine();
+                        LocalDateTime startTime = dateInput.isEmpty() ? null :
+                                LocalDateTime.parse(dateInput, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+
+                        System.out.println("Введите продолжительность в минутах");
+                        String durationInput = scanner.nextLine();
+                        Duration duration = durationInput.isEmpty() ? null :
+                                Duration.ofMinutes(Long.parseLong(durationInput));
+
+                        Task newTask = new Task(name, description, statusEnum, startTime, duration);
                         inMemoryTaskManager.addTask(newTask);
 
                     } else if (commandTasks == 5) {
@@ -58,14 +75,28 @@ public class Main {
                         System.out.println("Введите ID");
                         long idTask = scanner.nextInt();
                         scanner.nextLine();
+
                         System.out.println("Введите название задачи");
                         String name = scanner.nextLine();
+
                         System.out.println("Введите описание задачи");
                         String description = scanner.nextLine();
+
                         System.out.println("Введите статус задачи NEW, IN_PROGRESS, DONE");
                         StatusEnum status = StatusEnum.valueOf(scanner.next());
 
-                        Task task = new Task(name, description, status);
+                        System.out.println("Введите дату начала (yyyy-MM-dd HH:mm)");
+                        scanner.nextLine();
+                        String dateInput = scanner.nextLine();
+                        LocalDateTime startTime = dateInput.isEmpty() ? null :
+                                LocalDateTime.parse(dateInput, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+
+                        System.out.println("Введите продолжительность в минутах");
+                        String durationInput = scanner.nextLine();
+                        Duration duration = durationInput.isEmpty() ? null :
+                                Duration.ofMinutes(Long.parseLong(durationInput));
+
+                        Task task = new Task(name, description, status, startTime, duration);
                         task.setId(idTask);
 
                         inMemoryTaskManager.updateTask(task);
@@ -97,6 +128,7 @@ public class Main {
 
                         System.out.println("Введите ID");
                         long deleteEpicTask = scanner.nextInt();
+
                         System.out.println("Объект удален");
                         inMemoryTaskManager.removeEpicTask(deleteEpicTask);
                     } else if (commandEpicTask == 4) {
@@ -104,6 +136,7 @@ public class Main {
                         scanner.nextLine();
                         System.out.println("Введите название эпика");
                         String name = scanner.nextLine();
+
                         System.out.println("Введите описание эпика");
                         String description = scanner.nextLine();
 
@@ -116,10 +149,13 @@ public class Main {
                         System.out.println("Введите ID");
                         long idTask = scanner.nextInt();
                         scanner.nextLine();
+
                         System.out.println("Введите название епика");
                         String name = scanner.nextLine();
+
                         System.out.println("Введите описание епика");
                         String description = scanner.nextLine();
+
                         System.out.println("Введите статус епика NEW, IN_PROGRESS, DONE");
                         StatusEnum status = StatusEnum.valueOf(scanner.next());
 
@@ -174,12 +210,25 @@ public class Main {
 
                             System.out.println("Введите название подзадачи");
                             String name = scanner.nextLine();
+
                             System.out.println("Введите описание подзадачи");
                             String description = scanner.nextLine();
+
                             System.out.println("Введите статус NEW, IN_PROGRESS, DONE");
                             StatusEnum status = StatusEnum.valueOf(scanner.next());
 
-                            SubTask subTask = new SubTask(name, description, status, epicTask.getId());
+                            System.out.println("Введите дату начала (yyyy-MM-dd HH:mm)");
+                            scanner.nextLine();
+                            String dateInput = scanner.nextLine();
+                            LocalDateTime startTime = dateInput.isEmpty() ? null :
+                                    LocalDateTime.parse(dateInput, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+
+                            System.out.println("Введите продолжительность в минутах");
+                            String durationInput = scanner.nextLine();
+                            Duration duration = durationInput.isEmpty() ? null :
+                                    Duration.ofMinutes(Long.parseLong(durationInput));
+
+                            SubTask subTask = new SubTask(name, description, status, startTime, duration, epicTask.getId());
                             inMemoryTaskManager.addSubTask(subTask);
 
                         } else if (commandSubTask == 5) {
@@ -189,15 +238,28 @@ public class Main {
                             System.out.println("Введите ID");
                             long idTask = scanner.nextInt();
                             scanner.nextLine();
+
                             System.out.println("Введите название сабтаски");
                             String name = scanner.nextLine();
+
                             System.out.println("Введите описание сабтаски");
                             String description = scanner.nextLine();
+
                             System.out.println("Введите статус сабтаски NEW, IN_PROGRESS, DONE");
                             StatusEnum status = StatusEnum.valueOf(scanner.next());
 
+                            System.out.println("Введите дату начала (yyyy-MM-dd HH:mm)");
+                            scanner.nextLine();
+                            String dateInput = scanner.nextLine();
+                            LocalDateTime startTime = dateInput.isEmpty() ? null :
+                                    LocalDateTime.parse(dateInput, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
 
-                            SubTask subTask = new SubTask(name, description, status, 0);
+                            System.out.println("Введите продолжительность в минутах");
+                            String durationInput = scanner.nextLine();
+                            Duration duration = durationInput.isEmpty() ? null :
+                                    Duration.ofMinutes(Long.parseLong(durationInput));
+
+                            SubTask subTask = new SubTask(name, description, status, startTime, duration,0);
                             subTask.setId(idTask);
 
                             inMemoryTaskManager.updateSubTask(subTask);
