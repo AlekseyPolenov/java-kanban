@@ -5,7 +5,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
-import java.util.TreeSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -162,20 +161,16 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
 
         // Проверка добавления
         assertEquals(2, manager.getSubTasks().size());
-        assertEquals(2, manager.getPrioritizedTasks().size());
+        assertEquals(2, manager.getPrioritizedTasks().size()); // Только подзадачи
 
         // Удаление первой подзадачи
         manager.removeSubTask(subTask1.getId());
 
         // Проверка удаления
         assertEquals(1, manager.getSubTasks().size());
-        assertEquals(2, manager.getPrioritizedTasks().size());
+        assertEquals(1, manager.getPrioritizedTasks().size()); // Осталась одна подзадача
         assertNull(manager.getSubTask(subTask1.getId()));
-
-        // Проверка содержимого prioritizedTasks
-        TreeSet<Task> prioritized = manager.getPrioritizedTasks();
-        assertTrue(prioritized.contains(subTask2));
-        assertTrue(prioritized.contains(epic));
+        assertFalse(manager.getPrioritizedTasks().contains(subTask1));
 
         // Удаление последней подзадачи
         manager.removeSubTask(subTask2.getId());
@@ -388,12 +383,13 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
         Task task2 = new Task("Task2", "Desc", StatusEnum.NEW,
                 baseTime.plusHours(2), Duration.ofHours(1));
 
-        assertFalse(manager.isTimeOverlap(task1, task2));
+        manager.addTask(task1);
+        assertFalse(manager.hasTimeOverlap(task2));
 
         Task task3 = new Task("Task3", "Desc", StatusEnum.NEW,
                 baseTime.plusMinutes(30), Duration.ofHours(1));
 
-        assertTrue(manager.isTimeOverlap(task1, task3));
+        assertTrue(manager.hasTimeOverlap(task3));
     }
 
     @Test
@@ -418,7 +414,7 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
         manager.addTask(task1);
         manager.addTask(task2);
 
-        TreeSet<Task> prioritized = manager.getPrioritizedTasks();
+        List<Task> prioritized = manager.getPrioritizedTasks();
 
         Iterator<Task> it = prioritized.iterator();
 

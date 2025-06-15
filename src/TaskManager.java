@@ -1,5 +1,4 @@
 import java.util.List;
-import java.util.TreeSet;
 
 public interface TaskManager {
 
@@ -43,5 +42,5 @@ public interface TaskManager {
 
     List<Task> getTasksHistory();
 
-    TreeSet<Task> getPrioritizedTasks();
+    List<Task> getPrioritizedTasks();
 }

@@ -7,7 +7,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected Map<Long, EpicTask> taskEpicMap;
     protected Map<Long, SubTask> subTaskMap;
     private HistoryManager historyManager;
-    private final TreeSet<Task> prioritizedTasks = new TreeSet<>(
+    private final Set<Task> prioritizedTasks = new TreeSet<>(
             Comparator.comparing(Task::getStartTime, Comparator.nullsLast(Comparator.naturalOrder()))
                     .thenComparing(Task::getId)
     );
@@ -115,11 +115,6 @@ public class InMemoryTaskManager implements TaskManager {
                 epic.getSubTasks().remove(removedSubTask);
                 epic.updateStatus();
                 epic.updateTime();
-
-                prioritizedTasks.remove(epic);
-                if (!epic.getSubTasks().isEmpty() && epic.getStartTime() != null) {
-                    prioritizedTasks.add(epic);
-                }
             }
         }
         historyManager.removeTaskHistory(deleteSubTask);
@@ -172,16 +167,17 @@ public class InMemoryTaskManager implements TaskManager {
         return historyManager.getTasksHistory();
     }
 
+    private boolean isTimeChanged(Task task, Task updateTask) {
+       return !Objects.equals(task.getStartTime(), updateTask.getStartTime()) ||
+                !Objects.equals(task.getDuration(), updateTask.getDuration());
+    }
+
     @Override
     public void updateTask(Task updateTask) {
         Task task = taskMap.get(updateTask.getId());
         if (task == null) return;
 
-        boolean timeChanged = !Objects.equals(task.getStartTime(), updateTask.getStartTime()) ||
-                !Objects.equals(task.getDuration(), updateTask.getDuration());
-
-        if (timeChanged) {
-            prioritizedTasks.remove(task);
+        if (isTimeChanged(task, updateTask)) {
             if (hasTimeOverlap(updateTask)) {
                 prioritizedTasks.add(task);
                 throw new IllegalStateException("Обновленная задача пересекается по времени с существующей");
@@ -219,10 +215,7 @@ public class InMemoryTaskManager implements TaskManager {
         SubTask subTask = subTaskMap.get(updateSubTask.getId());
         if (subTask == null) return;
 
-        boolean timeChanged = !Objects.equals(subTask.getStartTime(), updateSubTask.getStartTime())
-                || !Objects.equals(subTask.getDuration(), updateSubTask.getDuration());
-
-        if (timeChanged) {
+        if (isTimeChanged(subTask, updateSubTask)) {
             prioritizedTasks.remove(subTask);
 
             if (hasTimeOverlap(updateSubTask)) {
@@ -237,7 +230,7 @@ public class InMemoryTaskManager implements TaskManager {
         subTask.setStartTime(updateSubTask.getStartTime());
         subTask.setDuration(updateSubTask.getDuration());
 
-        if (timeChanged && subTask.getStartTime() != null) {
+        if (isTimeChanged(subTask, updateSubTask) && subTask.getStartTime() != null) {
             prioritizedTasks.add(subTask);
         }
 
@@ -249,11 +242,11 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public TreeSet<Task> getPrioritizedTasks() {
-        return prioritizedTasks;
+    public List<Task> getPrioritizedTasks() {
+        return new ArrayList<>(prioritizedTasks);
     }
 
-    public boolean isTimeOverlap(Task task1, Task task2) {
+    private boolean isTimeOverlap(Task task1, Task task2) {
         if (task1.getStartTime() == null || task2.getStartTime() == null)
             return false;
 
