@@ -1,6 +1,8 @@
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,11 +20,14 @@ class InMemoryHistoryManagerTest {
 
     @Test
     void addTaskHistory() {
-        Task task1 = new Task("111", "1", StatusEnum.NEW);
+        Task task1 = new Task("111", "1", StatusEnum.NEW,
+                LocalDateTime.of(2023, 1, 1, 10, 0), Duration.ofHours(1));
         task1.setId(1);
-        Task task2 = new Task("222", "2", StatusEnum.IN_PROGRESS);
+        Task task2 = new Task("222", "2", StatusEnum.IN_PROGRESS,
+                LocalDateTime.of(2023, 1, 1, 10, 0), Duration.ofHours(1));
         task2.setId(2);
-        Task task3 = new Task("3", "3", StatusEnum.DONE);
+        Task task3 = new Task("3", "3", StatusEnum.DONE,
+                LocalDateTime.of(2023, 1, 1, 10, 0), Duration.ofHours(1));
         task3.setId(0);
 
         manager.addTaskHistory(task1);
@@ -54,9 +59,11 @@ class InMemoryHistoryManagerTest {
 
     @Test
     void removeTaskHistory() {
-        Task task1 = new Task("111", "1", StatusEnum.NEW);
+        Task task1 = new Task("111", "1", StatusEnum.NEW,
+                LocalDateTime.of(2023, 1, 1, 10, 0), Duration.ofHours(1));
         task1.setId(0);
-        Task task2 = new Task("222", "2", StatusEnum.IN_PROGRESS);
+        Task task2 = new Task("222", "2", StatusEnum.IN_PROGRESS,
+                LocalDateTime.of(2023, 1, 1, 10, 0), Duration.ofHours(1));
         task2.setId(1);
 
         manager.addTaskHistory(task1);
@@ -71,4 +78,5 @@ class InMemoryHistoryManagerTest {
         assertEquals(1, histories.size());
         assertFalse(histories.contains(task1));
     }
+
 }

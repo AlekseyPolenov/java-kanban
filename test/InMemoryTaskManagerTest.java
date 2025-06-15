@@ -1,13 +1,19 @@
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class InMemoryTaskManagerTest {
+class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
 
-    private InMemoryTaskManager manager;
+    @Override
+    protected InMemoryTaskManager createManager() {
+        return new InMemoryTaskManager();
+    }
 
     @BeforeEach
     public void init() {
@@ -16,7 +22,8 @@ class InMemoryTaskManagerTest {
 
     @Test
     void addTask() {
-        Task task = new Task("", "", StatusEnum.DONE);
+        Task task = new Task("", "", StatusEnum.DONE,
+                LocalDateTime.of(2023, 1, 1, 10, 0), Duration.ofHours(1));
         task.setId(0);
 
         manager.addTask(task);
@@ -28,7 +35,8 @@ class InMemoryTaskManagerTest {
 
     @Test
     void deleteTask() {
-        Task task = new Task("", "", StatusEnum.NEW);
+        Task task = new Task("", "", StatusEnum.NEW,
+                LocalDateTime.of(2023, 1, 1, 10, 0), Duration.ofHours(1));
         manager.addTask(task);
         assertEquals(1, manager.getTasks().size());
         manager.deleteTask();
@@ -37,8 +45,10 @@ class InMemoryTaskManagerTest {
 
     @Test
     void removeTask() {
-        Task task1 = new Task("1", "1", StatusEnum.NEW);
-        Task task2 = new Task("2", "2", StatusEnum.NEW);
+        Task task1 = new Task("1", "1", StatusEnum.NEW,
+                LocalDateTime.of(2023, 1, 1, 10, 0), Duration.ofHours(1));
+        Task task2 = new Task("2", "2", StatusEnum.NEW,
+                LocalDateTime.of(2024, 1, 1, 10, 0), Duration.ofHours(1));
 
         manager.addTask(task1);
         manager.addTask(task2);
@@ -108,7 +118,10 @@ class InMemoryTaskManagerTest {
     void addSubTask() {
         EpicTask epicTask = new EpicTask("", "", StatusEnum.NEW);
         manager.addEpicTask(epicTask);
-        SubTask subTask = new SubTask("", "", StatusEnum.DONE, epicTask.getId());
+        SubTask subTask = new SubTask("", "", StatusEnum.DONE,
+                LocalDateTime.of(2023, 1, 1, 10, 0),
+                Duration.ofHours(1), epicTask.getId());
+
         subTask.setId(0);
         manager.addSubTask(subTask);
         assertEquals(StatusEnum.DONE, epicTask.getStatus());
@@ -120,7 +133,10 @@ class InMemoryTaskManagerTest {
     void deleteSubTask() {
         EpicTask epicTask = new EpicTask("", "", StatusEnum.NEW);
         manager.addEpicTask(epicTask);
-        SubTask subTask = new SubTask("", "", StatusEnum.DONE, epicTask.getId());
+        SubTask subTask = new SubTask("", "", StatusEnum.DONE,
+                LocalDateTime.of(2023, 1, 1, 10, 0),
+                Duration.ofHours(1), epicTask.getId());
+
         subTask.setId(0);
         manager.addSubTask(subTask);
         assertEquals(1, epicTask.getSubTasks().size());
@@ -132,43 +148,40 @@ class InMemoryTaskManagerTest {
 
     @Test
     void removeSubTask() {
-        EpicTask epicTask = new EpicTask("12", "12", StatusEnum.NEW);
-        manager.addEpicTask(epicTask);
+        EpicTask epic = new EpicTask("Epic", "Description", StatusEnum.NEW);
+        manager.addEpicTask(epic);
 
-        SubTask subTask = new SubTask("0", "0", StatusEnum.DONE, epicTask.getId());
-        SubTask subTask1 = new SubTask("1", "1", StatusEnum.IN_PROGRESS, epicTask.getId());
+        SubTask subTask1 = new SubTask("Sub1", "Desc1", StatusEnum.DONE,
+                LocalDateTime.of(2023, 1, 1, 10, 0), Duration.ofHours(1), epic.getId());
+        SubTask subTask2 = new SubTask("Sub2", "Desc2", StatusEnum.IN_PROGRESS,
+                LocalDateTime.of(2023, 1, 1, 12, 0), Duration.ofHours(1), epic.getId());
 
-        manager.addSubTask(subTask);
         manager.addSubTask(subTask1);
-        manager.getSubTask(subTask.getId());
+        manager.addSubTask(subTask2);
 
-        assertEquals(StatusEnum.IN_PROGRESS, epicTask.getStatus());
-        assertEquals(2, epicTask.getSubTasks().size());
+        // Проверка добавления
         assertEquals(2, manager.getSubTasks().size());
+        assertEquals(2, manager.getPrioritizedTasks().size()); // Только подзадачи
 
-        List<Task> histories = manager.getTasksHistory();
-        assertEquals(1, histories.size());
-        assertEquals(subTask, histories.getFirst());
-
+        // Удаление первой подзадачи
         manager.removeSubTask(subTask1.getId());
 
+        // Проверка удаления
         assertEquals(1, manager.getSubTasks().size());
-        SubTask expectedTask = manager.getSubTasks().getFirst();
-        assertEquals(expectedTask, subTask);
+        assertEquals(1, manager.getPrioritizedTasks().size()); // Осталась одна подзадача
+        assertNull(manager.getSubTask(subTask1.getId()));
+        assertFalse(manager.getPrioritizedTasks().contains(subTask1));
 
-        assertEquals(1, epicTask.getSubTasks().size());
-        SubTask expectedTaskFromEpic = epicTask.getSubTasks().getFirst();
-        assertEquals(expectedTaskFromEpic, subTask);
-        assertEquals(StatusEnum.DONE, epicTask.getStatus());
-
-        manager.removeSubTask(subTask.getId());
-
-        assertEquals(0, manager.getTasksHistory().size());
+        // Удаление последней подзадачи
+        manager.removeSubTask(subTask2.getId());
+        assertEquals(0, manager.getSubTasks().size());
+        assertEquals(0, manager.getPrioritizedTasks().size());
     }
 
     @Test
     void getTask() {
-        Task task = new Task("", "", StatusEnum.DONE);
+        Task task = new Task("", "", StatusEnum.DONE,
+                LocalDateTime.of(2023, 1, 1, 10, 0), Duration.ofHours(1));
         manager.addTask(task);
 
         assertEquals(0, manager.getTasksHistory().size());
@@ -207,7 +220,10 @@ class InMemoryTaskManagerTest {
     void getSubTask() {
         EpicTask epicTask = new EpicTask("", "", StatusEnum.DONE);
         manager.addEpicTask(epicTask);
-        SubTask subTask = new SubTask("", "", StatusEnum.DONE, epicTask.getId());
+        SubTask subTask = new SubTask("", "", StatusEnum.DONE,
+                LocalDateTime.of(2023, 1, 1, 10, 0),
+                Duration.ofHours(1), epicTask.getId());
+
         manager.addSubTask(subTask);
         assertEquals(0, manager.getTasksHistory().size());
 
@@ -227,8 +243,15 @@ class InMemoryTaskManagerTest {
     void getSubTasks() {
         EpicTask epicTask = new EpicTask("", "", StatusEnum.NEW);
         manager.addEpicTask(epicTask);
-        SubTask subTask = new SubTask("", "", StatusEnum.NEW, epicTask.getId());
-        SubTask subTask1 = new SubTask("", "", StatusEnum.NEW, epicTask.getId());
+
+        SubTask subTask = new SubTask("", "", StatusEnum.NEW,
+                LocalDateTime.of(2023, 1, 1, 10, 0),
+                Duration.ofHours(1), epicTask.getId());
+
+        SubTask subTask1 = new SubTask("", "", StatusEnum.NEW,
+                LocalDateTime.of(2023, 2, 1, 10, 0),
+                Duration.ofHours(1), epicTask.getId());
+
         manager.addSubTask(subTask);
         manager.addSubTask(subTask1);
         assertEquals(2, manager.getSubTasks().size());
@@ -236,7 +259,8 @@ class InMemoryTaskManagerTest {
 
     @Test
     void immutableTaskAfterAddTest() {
-        Task task = new Task("Отпуск", "Мальдивы", StatusEnum.DONE);
+        Task task = new Task("Отпуск", "Мальдивы", StatusEnum.DONE,
+                LocalDateTime.of(2023, 1, 1, 10, 0), Duration.ofHours(1));
 
         manager.addTask(task);
         Task actualTask = manager.getTask(task.getId());
@@ -261,7 +285,9 @@ class InMemoryTaskManagerTest {
 
     @Test
     void immutableSubTaskAfterAddTest() {
-        SubTask subTask = new SubTask("", "", StatusEnum.DONE, 1);
+        SubTask subTask = new SubTask("", "", StatusEnum.DONE,
+                LocalDateTime.of(2023, 1, 1, 10, 0), Duration.ofHours(1),
+                1);
 
         manager.addSubTask(subTask);
         SubTask actualTask = manager.getSubTask(subTask.getId());
@@ -274,11 +300,13 @@ class InMemoryTaskManagerTest {
 
     @Test
     void updateTaskTest() {
-        Task task = new Task("", "", StatusEnum.NEW);
+        Task task = new Task("", "", StatusEnum.NEW,
+                LocalDateTime.of(2023, 1, 1, 10, 0), Duration.ofHours(1));
 
         manager.addTask(task);
 
-        Task updatedTask = new Task("Поездка", "на поезде", StatusEnum.IN_PROGRESS);
+        Task updatedTask = new Task("Поездка", "на поезде", StatusEnum.IN_PROGRESS,
+                LocalDateTime.of(2023, 1, 1, 10, 0), Duration.ofHours(1));
         updatedTask.setId(task.getId());
 
         manager.updateTask(updatedTask);
@@ -291,28 +319,51 @@ class InMemoryTaskManagerTest {
 
     @Test
     void updateEpicTaskTest() {
-        EpicTask epicTask = new EpicTask("", "", StatusEnum.NEW);
+        EpicTask originalEpic = new EpicTask("Original", "Original description", StatusEnum.NEW);
+        manager.addEpicTask(originalEpic);
+        long epicId = originalEpic.getId();
 
-        manager.addEpicTask(epicTask);
+        SubTask subTask1 = new SubTask("SubTask 1", "Desc 1", StatusEnum.NEW,
+                LocalDateTime.of(2023, 1, 1, 10, 0), Duration.ofHours(1), epicId);
+        SubTask subTask2 = new SubTask("SubTask 2", "Desc 2", StatusEnum.DONE,
+                LocalDateTime.of(2023, 1, 1, 12, 0), Duration.ofHours(2), epicId);
 
-        EpicTask updatedEpicTask = new EpicTask("Поездка", "на поезде", StatusEnum.IN_PROGRESS);
-        updatedEpicTask.setId(epicTask.getId());
+        manager.addSubTask(subTask1);
+        manager.addSubTask(subTask2);
 
-        manager.updateEpicTask(updatedEpicTask);
-        epicTask = manager.getEpicTask(epicTask.getId());
+        assertEquals(StatusEnum.IN_PROGRESS, originalEpic.getStatus());
+        assertNotNull(originalEpic.getStartTime());
+        assertNotNull(originalEpic.getEndTime());
 
-        assertEquals("Поездка", epicTask.getName());
-        assertEquals("на поезде", epicTask.getDescription());
-        assertEquals(StatusEnum.IN_PROGRESS, epicTask.getStatus());
+        EpicTask updatedEpic = new EpicTask("Updated", "Updated description", StatusEnum.DONE);
+        updatedEpic.setId(epicId);
+
+        manager.updateEpicTask(updatedEpic);
+
+        EpicTask retrievedEpic = manager.getEpicTask(epicId);
+
+        assertEquals("Updated", retrievedEpic.getName());
+        assertEquals("Updated description", retrievedEpic.getDescription());
+
+        assertEquals(StatusEnum.IN_PROGRESS, retrievedEpic.getStatus());
+
+        assertEquals(2, retrievedEpic.getSubTasks().size());
+
+        assertNotNull(retrievedEpic.getStartTime());
+        assertNotNull(retrievedEpic.getEndTime());
+
+        assertTrue(manager.getPrioritizedTasks().contains(retrievedEpic));
     }
 
     @Test
     void updateSubTaskTest() {
-        SubTask subTask = new SubTask("", "", StatusEnum.NEW, 1);
+        SubTask subTask = new SubTask("", "", StatusEnum.NEW,
+                LocalDateTime.of(2023, 1, 1, 10, 0), Duration.ofHours(1),1);
 
         manager.addSubTask(subTask);
 
-        SubTask updatedTask = new SubTask("Поездка", "на поезде", StatusEnum.IN_PROGRESS, 2);
+        SubTask updatedTask = new SubTask("Поездка", "на поезде", StatusEnum.IN_PROGRESS,
+                LocalDateTime.of(2023, 1, 1, 10, 0), Duration.ofHours(1), 2);
         updatedTask.setId(subTask.getId());
 
         manager.updateSubTask(updatedTask);
@@ -321,5 +372,60 @@ class InMemoryTaskManagerTest {
         assertEquals("Поездка", subTask.getName());
         assertEquals("на поезде", subTask.getDescription());
         assertEquals(StatusEnum.IN_PROGRESS, subTask.getStatus());
+    }
+
+    @Test
+    void isTimeOverlap() {
+        LocalDateTime baseTime = LocalDateTime.of(2023, 1, 1, 10, 0);
+
+        Task task1 = new Task("Task1", "Desc", StatusEnum.NEW,
+                baseTime, Duration.ofHours(1));
+        Task task2 = new Task("Task2", "Desc", StatusEnum.NEW,
+                baseTime.plusHours(2), Duration.ofHours(1));
+
+        manager.addTask(task1);
+        assertFalse(manager.hasTimeOverlap(task2));
+
+        Task task3 = new Task("Task3", "Desc", StatusEnum.NEW,
+                baseTime.plusMinutes(30), Duration.ofHours(1));
+
+        assertTrue(manager.hasTimeOverlap(task3));
+    }
+
+    @Test
+    void hasTimeOverlap() {
+        Task task1 = new Task("Task1", "Desc", StatusEnum.NEW,
+                LocalDateTime.of(2023, 1, 1, 10, 0), Duration.ofHours(1));
+        manager.addTask(task1);
+
+        Task task2 = new Task("Task2", "Desc", StatusEnum.NEW,
+                LocalDateTime.of(2023, 1, 1, 10, 30), Duration.ofHours(1));
+
+        assertTrue(manager.hasTimeOverlap(task2));
+    }
+
+    @Test
+    void getPrioritizedTasks() {
+        Task task1 = new Task("Task1", "Desc", StatusEnum.NEW,
+                LocalDateTime.of(2023, 1, 1, 12, 0), Duration.ofHours(1));
+        Task task2 = new Task("Task2", "Desc", StatusEnum.NEW,
+                LocalDateTime.of(2023, 1, 1, 10, 0), Duration.ofHours(1));
+
+        manager.addTask(task1);
+        manager.addTask(task2);
+
+        List<Task> prioritized = manager.getPrioritizedTasks();
+
+        Iterator<Task> it = prioritized.iterator();
+
+        Task prioritizedTask1;
+        Task prioritizedTask2;
+
+        prioritizedTask1 = it.next();
+        prioritizedTask2 = it.next();
+
+        assertEquals(2, prioritized.size());
+        assertEquals(task2, prioritizedTask1);
+        assertEquals(task1, prioritizedTask2);
     }
 }
