@@ -8,9 +8,9 @@ import managers.TaskManager;
 import server.adapters.DurationAdapter;
 import server.adapters.LocalDateTimeAdapter;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
@@ -26,7 +26,7 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
     }
 
     @Override
-    public void handle(HttpExchange exchange) throws IOException {
+    public void handle(HttpExchange exchange) {
         try {
             String method = exchange.getRequestMethod();
             String path = exchange.getRequestURI().getPath();
@@ -74,8 +74,12 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
                 default:
                     sendNotFound(exchange);
             }
+        } catch (NumberFormatException e) {
+            System.err.println("Error: ID must be a number.");
+        } catch (ArrayIndexOutOfBoundsException e) {
+            System.err.println("Error: URL must contain an ID.");
         } catch (Exception e) {
-            sendInternalError(exchange);
+            System.err.println(Arrays.toString(e.getStackTrace()));
         }
     }
 }

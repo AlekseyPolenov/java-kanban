@@ -40,7 +40,8 @@ public class BaseHttpHandler {
     }
 
     protected String readRequestBody(HttpExchange exchange) throws IOException {
-        InputStream inputStream = exchange.getRequestBody();
-        return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        try (InputStream inputStream = exchange.getRequestBody()) {
+            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        }
     }
 }

@@ -9,9 +9,9 @@ import models.Task;
 import server.adapters.DurationAdapter;
 import server.adapters.LocalDateTimeAdapter;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 public class TasksHandler extends BaseHttpHandler implements HttpHandler {
@@ -27,7 +27,7 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
     }
 
     @Override
-    public void handle(HttpExchange exchange) throws IOException {
+    public void handle(HttpExchange exchange) {
         try {
             String method = exchange.getRequestMethod();
             String path = exchange.getRequestURI().getPath();
@@ -65,14 +65,18 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
                     } else if (pathParts.length == 3) {
                         long id = Long.parseLong(pathParts[2]);
                         taskManager.removeTask(id);
-                        sendSuccess(exchange, "{\"message\":\"model.models.Task deleted\"}");
+                        sendSuccess(exchange, "{\"message\":\"Task deleted\"}");
                     }
                     break;
                 default:
                     sendNotFound(exchange);
             }
+        } catch (NumberFormatException e) {
+            System.err.println("Error: ID must be a number.");
+        } catch (ArrayIndexOutOfBoundsException e) {
+            System.err.println("Error: URL must contain an ID.");
         } catch (Exception e) {
-            sendInternalError(exchange);
+            System.err.println(Arrays.toString(e.getStackTrace()));
         }
     }
 }
